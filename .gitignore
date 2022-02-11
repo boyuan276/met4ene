@@ -50,3 +50,10 @@ ei.oper.an*
 */ei.oper.an*
 *.db
 **/.pytest_cache/
+dirpath.yml
+optwrf/optwrf/data/dirpath.yml
+optwrf/optwrf/helper_functions.py
+templates/magma2templates/template_rungeogrid.csh
+templates/magma2templates/template_runreal.csh
+templates/magma2templates/template_runungmetg.csh
+templates/magma2templates/template_runwrf.csh
