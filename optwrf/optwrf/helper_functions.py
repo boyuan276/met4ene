@@ -186,7 +186,8 @@ def format_date(in_date):
                 '%m-%d-%Y', '%m.%d.%Y', '%m/%d/%Y',
                 '%Y-%m-%d', '%Y.%m.%d', '%Y/%m/%d',
                 '%b %d %Y %H', '%B %d %Y %H', '%b %d, %Y %H', '%B %d, %Y %H',
-                '%m-%d-%Y %H', '%m.%d.%Y %H', '%m/%d/%Y %H'):
+                '%m-%d-%Y %H', '%m.%d.%Y %H', '%m/%d/%Y %H',
+                '%Y-%m-%d %H:%M:%S', '%Y-%m-%d_%H:%M:%S'):
         try:
             return datetime.datetime.strptime(in_date, fmt)
         except ValueError:
@@ -327,25 +328,25 @@ def print_last_3lines(file_name):
         return
 
 
-def rda_download(filelist, dspath):
+def rda_download(filelist, dspath, user_email, user_pswd):
     """
     Logs into the NCAR research data archive (RDA)
     and downloads specified files.
 
-    NOTE: My username/password are currently hard-coded into this function.
-    I SHOULD CHAGE THIS!
-
     :param filelist: list of strings
         List of all the files that you would like downloaded from the RDA.
-    :param dspath : string
-        Full path to file on the RDA. You can obtain this from
+    :param dspath: string
+        Full path to file on the RDA.
+    :param user_email: string
+        User's email correspondig to their RDA account.
+    :param user_pswd: string
+        User's RDA account password.
     :return: a boolean (True/False) success flag.
 
     """
     # Specify login information and url for RDA
-    pswd = 'mkjmJ17'
     url = 'https://rda.ucar.edu/cgi-bin/login'
-    values = {'email': 'jas983@cornell.edu', 'passwd': pswd, 'action': 'login'}
+    values = {'email': user_email, 'passwd': user_pswd, 'action': 'login'}
 
     # RDA user authentication
     ret = requests.post(url, data=values)

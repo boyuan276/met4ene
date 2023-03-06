@@ -4,8 +4,7 @@ and process WRF output data.
 
 
 Known Issues/Wishlist:
-- My username/password are currently hard-coded into rda_download(). I SHOULD CHAGE THIS!
-- In determine_computer(), only my user name identifies magma -- should generalize this.
+- In determine_computer(), only my user name identifies magma -- could generalize this.
 - Need to include in documentation:
     - A description of how to create the dirpath.yml file.
     - A description of how to customize the templates directory.
@@ -46,7 +45,7 @@ class WRFModel:
     """
 
     def __init__(self, param_ids, start_date, end_date, bc_data='ERA', bc_src='RDA',
-                 n_domains=1, setup_yaml='dirpath.yml', wfp=False, verbose=True):
+                 n_domains=1, setup_yaml='dirpath.yml', wfp=False, rda_email=None, rda_pswd=None, verbose=True):
         self.param_ids = param_ids
         self.start_date = start_date
         self.end_date = end_date
@@ -54,6 +53,8 @@ class WRFModel:
         self.bc_src = bc_src
         self.n_domains = n_domains
         self.wfp = wfp
+        self.rda_email = rda_email
+        self.rda_pswd = rda_pswd
         self.verbose = verbose
 
         # Format the forecast start/end and determine the total time.
@@ -107,6 +108,11 @@ class WRFModel:
                                    + self.forecast_start.strftime('%d') + '_00:00:00'
         if self.n_domains > 2:
             self.FILE_WRFOUT_d03 = 'wrfout_d03' + '_' \
+                                   + self.forecast_start.strftime('%Y') + '-' \
+                                   + self.forecast_start.strftime('%m') + '-' \
+                                   + self.forecast_start.strftime('%d') + '_00:00:00'
+        if self.n_domains > 3:
+            self.FILE_WRFOUT_d04 =  'wrfout_d04' + '_' \
                                    + self.forecast_start.strftime('%Y') + '-' \
                                    + self.forecast_start.strftime('%m') + '-' \
                                    + self.forecast_start.strftime('%d') + '_00:00:00'
@@ -189,7 +195,7 @@ class WRFModel:
 
     def get_bc_data(self):
         """
-        Downloads boundary condition data from the RDA
+        Downloads boundary condition data from the RDA or uses the CDS API
         if it does not already exist in the expected data directory (self.DIR_DATA).
         Then, it creates a temporary data directory (self.DIR_DATA_TMP) and copies
         data from the central data directory to the temporary data directory.
@@ -199,7 +205,11 @@ class WRFModel:
         easier to link all the files in the temporary data directory than to link
         indidivdual files out of the central data directory.
 
-        NOTE Currently, only ERA5 data (ds633.0) and the old ERA-interim data (ds627.0) are supported!
+        *NOTE: Currently, only ERA5 data (ds633.0) and the old ERA-interim data (ds627.0) are supported!
+
+        Also, it the CDS API method could use some work -- right now it just downloads 
+        all the files in the date list without checking if they are already downloaded.
+        In general, prints to the screen during both data downloads could be improved.
 
         :return vtable_sfx: string
             WPS variable table suffix -- tells subsequent methods which boundary condidtion data is being used
@@ -342,8 +352,8 @@ class WRFModel:
                 filelist = []
                 for date in date_list:
                     for hr in hrs:
-                        year_mo = date.strftime('%Y') + date.strftime('%m')
-                        year_mo_day_hr = date.strftime('%Y') + date.strftime('%m') + date.strftime('%d') + hr
+                        year_mo = date.strftime('%Y%m')
+                        year_mo_day_hr = date.strftime('%Y%m%d') + hr
                         filelist.append(DATA_ROOT1 + year_mo + '/' + datpfx1 + year_mo_day_hr)
                         filelist.append(DATA_ROOT1 + year_mo + '/' + datpfx2 + year_mo_day_hr)
                         filelist.append(DATA_ROOT2 + year_mo + '/' + datpfx3 + year_mo_day_hr)
@@ -355,11 +365,13 @@ class WRFModel:
                 # For the CDS API, we simply download one pressure levels file and one surface file
                 # for each day. However, the command we will use to download the pressure level data
                 # and the surfce data will be different, so we need three file
-                pl_filelist = []
-                sfc_filelist = []
+                # pl_filelist = []
+                # sfc_filelist = []
                 for date in date_list:
-                    year_mo_day = date.strftime('%Y') + date.strftime('%m') + date.strftime('%d')
+                    year_mo_day = date.strftime('%Y%m%d')
                     # Add the files to the lists
+                    # pl_filelist.append()
+                    # sfc_filelist.append()
                     file_check.append(f'{pl_pfx}{year_mo_day}_{year_mo_day}.grb')
                     file_check.append(f'{sfc_pfx}{year_mo_day}_{year_mo_day}.grb')
 
@@ -375,22 +387,24 @@ class WRFModel:
 
             if data_exists.count(True) == len(file_check):
                 if self.verbose:
-                    print('Boundary condition data was previously downloaded from RDA.')
+                    print('Boundary condition data was previously downloaded.')
             else:
                 if self.bc_src == 'RDA':
                     # Download the data from the online RDA (requires password and connection)
-                    success = rda_download(filelist, dspath)
+                    success = rda_download(filelist, dspath, self.rda_email, self.rda_pswd)
                     if not success:
                         print(f'{self.bc_data} data was not successfully downloaded from RDA.')
                         raise RuntimeError
                 elif self.bc_src == 'CDS':
                     # Download the data using the CDS API
                     for date in date_list:
-                        year_mo_day = date.strftime('%Y') + date.strftime('%m') + date.strftime('%d')
+                        year_mo_day = date.strftime('%Y%m%d')
                         dates_str = f'{year_mo_day}/{year_mo_day}'
                         pl_file_name = f'{pl_pfx}{year_mo_day}_{year_mo_day}.grb'
                         sfc_file_name = f'{sfc_pfx}{year_mo_day}_{year_mo_day}.grb'
                         # Download the pressure level data
+                        if self.verbose:
+                            print(f'Downloading pressure level data for {date.strftime("%Y-%m-%d")} from CDS.')
                         util.get_data_cdsapi(cds_pl_product, cds_pl_vars,
                                              product_type=cds_product_type,
                                              fmt='grib',
@@ -398,16 +412,20 @@ class WRFModel:
                                              area=cds_area_str,
                                              date=dates_str,
                                              time=cds_times,
-                                             output_file_name=pl_file_name)
+                                             output_file_name=pl_file_name,
+                                             verbose=self.verbose)
 
                         # Download the surface data
+                        if self.verbose:
+                            print(f'Downloading surface data for {date.strftime("%Y-%m-%d")} from CDS.')
                         util.get_data_cdsapi(cds_sfc_product, cds_sfc_vars,
                                              product_type=cds_product_type,
                                              fmt='grib',
                                              area=cds_area_str,
                                              date=dates_str,
                                              time=cds_times,
-                                             output_file_name=sfc_file_name)
+                                             output_file_name=sfc_file_name,
+                                             verbose=self.verbose)
                 else:
                     print(f'Boundary condidion data source {self.bc_data} is not supportted.')
                     raise NotImplementedError
@@ -628,7 +646,7 @@ class WRFModel:
         for i in range(0, self.n_domains):
             wrf_physics = wrf_physics + str(self.param_ids[4]) + ', '
         wrf_physics = wrf_physics + '\n cu_physics                          = '
-        wrf_physics = wrf_physics + str(self.param_ids[5]) + ', 0, 0,'
+        wrf_physics = wrf_physics + str(self.param_ids[5]) + ', ' + (self.n_domains - 1) * '0, '
         wrf_physics = wrf_physics + '\n sf_sfclay_physics                   = '
         for i in range(0, self.n_domains):
             wrf_physics = wrf_physics + str(self.param_ids[6]) + ', '
@@ -877,7 +895,7 @@ class WRFModel:
 
         return True, hf.strfdelta(elapsed)
 
-    def process_wrfout_data(self):
+    def process_wrfout_data(self, domain=3):
         """
         Processes the wrfout file -- calculates GHI and wind power denity (WPD) and writes these variables
         to wrfout_processed_d01.nc data file to be used by the regridding script (wrf2era_error.ncl) in
@@ -896,7 +914,7 @@ class WRFModel:
 
         """
         # Absolute path to wrfout data file
-        wrfout_file = self.wrfout_file_name(domain=self.n_domains)
+        wrfout_file = self.wrfout_file_name(domain=domain)
         datapath = self.DIR_WRFOUT + wrfout_file
 
         try:
@@ -1356,8 +1374,10 @@ class WRFModel:
             wrfout_file = self.FILE_WRFOUT_d02
         elif domain == 3:
             wrfout_file = self.FILE_WRFOUT_d03
+        elif domain == 4:
+            wrfout_file = self.FILE_WRFOUT_d04
         else:
-            print(f'Domain {domain} is not a valid option. Choose 1 - 3')
+            print(f'Domain {domain} is not a valid option. Choose 1 - 4')
             raise ValueError
         
         return wrfout_file
@@ -1413,7 +1433,7 @@ def run_all(wrf_sim, disable_timeout=True, verbose=False, save_wps_files=False):
 
         # RUN WRF
         if success:
-            success, runtime = wrf_sim.run_wrf(disable_timeout, save_wps_files=False)
+            success, runtime = wrf_sim.run_wrf(disable_timeout, save_wps_files=save_wps_files)
             if verbose:
                 print(f'WRF ran successfully? {success}')
         else:
@@ -1425,7 +1445,7 @@ def run_all(wrf_sim, disable_timeout=True, verbose=False, save_wps_files=False):
     return success, runtime
 
 
-def run_multiple(wrf_sims, disable_timeout=True, verbose=False):
+def run_multiple(wrf_sims, disable_timeout=True, verbose=False, save_wps_files=False):
     """
     Runs the simulations specified by the wrf_sims argument.
 
@@ -1443,7 +1463,8 @@ def run_multiple(wrf_sims, disable_timeout=True, verbose=False):
             sim_threads = []
             for sim in wrf_sims:
                 # Execute a new thread to run the WRF simulation
-                sim_threads.append(executor.submit(run_all, sim, disable_timeout=disable_timeout, verbose=verbose))
+                sim_threads.append(executor.submit(run_all, sim, disable_timeout=disable_timeout,
+                                   verbose=verbose, save_wps_files=save_wps_files))
 
             # Get the results from the thread pool executor
             success_matrix = []
