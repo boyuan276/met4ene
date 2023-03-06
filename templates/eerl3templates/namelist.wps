@@ -1,0 +1,36 @@
+&share
+ wrf_core = 'ARW',
+%DOMAIN%
+%DATES%
+ interval_seconds = 10800
+ io_form_geogrid = 2,
+/
+
+&geogrid
+ parent_id         = 0,   1,   2,   2,
+ parent_grid_ratio = 1,   3,   3,   3, 
+ i_parent_start    = 1,  56,  102, 178,
+ j_parent_start    = 1,  13,  51, 88,
+ e_we              = 148, 250, 190, 178,
+ e_sn              = 111, 154, 181, 130,
+ geog_data_res     = '30s','30s','30s','30s',
+ dx = 9000,
+ dy = 9000,
+ map_proj  = 'lambert',
+ ref_lat   =   41.50,
+ ref_lon   =  -76.00,
+ truelat1  =   40.00,
+ truelat2  =   43.00,
+ stand_lon =  -76.00,
+%GEOG%
+/
+
+&ungrib
+ out_format = 'WPS',
+ prefix = 'FILE',
+/
+
+&metgrid
+ fg_name = 'FILE'
+ io_form_metgrid = 2, 
+/
