@@ -72,7 +72,7 @@ def get_domain_boundary(wrfds, cartopy_crs):
 
     # I need to manually convert the boundaries of the WRF domain into Plate Carree to set the limits.
     # Get the raw map bounds using a wrf-python utility
-    raw_bounds = wrfpy.util.geo_bounds(wrfds)
+    raw_bounds = wrfpy.geo_bounds(wrfds)
 
     # Get the projected bounds telling cartopy that the input coordinates are lat/lon (Plate Carree)
     projected_bounds = cartopy_crs.transform_points(ccrs.PlateCarree(),
@@ -119,15 +119,17 @@ def format_cnplot_axis(axis, cn, proj_bounds, title_str='Contour Plot',
         edgecolor="black"
         )
 
-    # # Download and add the states, coastlines, and lakes
-    # states = cfeature.NaturalEarthFeature(category="cultural", scale="50m",
-    #                                       facecolor="none",
-    #                                       name="admin_1_states_provinces_shp")
+    # Download and add the states, coastlines, and lakes
+    states = cfeature.NaturalEarthFeature(category="cultural", scale="50m",
+                                          facecolor="none",
+                                          name="admin_1_states_provinces_lines")
 
     # Add features to the maps
-    # axis.add_feature(states, linewidth=.5, edgecolor="black")
+    axis.add_feature(states, linewidth=.5, edgecolor="black")
     axis.add_feature(cfeature.LAKES)
     axis.add_feature(cfeature.OCEAN)
+    axis.add_feature(cfeature.BORDERS)
+    axis.coastlines('50m', linewidth=0.8)
 
     # Add color bars
     if add_colorbar is True:
@@ -431,10 +433,12 @@ def compare_wrf_era5_plot(var, wrfds, erads, hourly=False, save_fig=False, fig_p
     time_indicies = range(0, len(wrfds.Time))
     # Format the times for title slides
     times_strings_f = wrfds.Time.dt.strftime('%b %d, %Y %H:%M')
+    times_strings_ff = wrfds.Time.dt.strftime('%b %d, %Y %H:00')
     # Get the desired variable(s)
     for tidx in time_indicies:
         timestr = wrfds.Time[tidx].values
         timestr_f = times_strings_f[tidx].values
+        timestr_ff = times_strings_ff[tidx].values
         if hourly:
             title_str = f'{era_var} (kW m-2)\n{timestr_f} (UTC)'
         else:
@@ -449,9 +453,11 @@ def compare_wrf_era5_plot(var, wrfds, erads, hourly=False, save_fig=False, fig_p
 
         # ERA5 GHI (divide by 1000 to convert from W to kW or Wh to kWh)
         if not hourly and tidx != 0:
-            plot_era5var = plot_era5var + (erads[era_var].sel(Time=timestr_f) / 1000)
+            # plot_era5var = plot_era5var + (erads[era_var].sel(Time=timestr_f) / 1000)
+            plot_era5var = plot_era5var + (erads[era_var].sel(Time=timestr_ff) / 1000)
         else:
-            plot_era5var = erads[era_var].sel(Time=timestr_f) / 1000
+            # plot_era5var = erads[era_var].sel(Time=timestr_f) / 1000
+            plot_era5var = erads[era_var].sel(Time=timestr_ff) / 1000
 
         # Create hourly plots
         if hourly:
@@ -582,8 +588,12 @@ def wrf_errorandfitness_plot(wrfds, paramstr, save_fig=False, wrf_dir='./', era_
     # Due to some obnioxious xarry nuance, the easiest way to keep the regridding function from adding additional
     # variables and coordinates to the xarray dataset in the outter scope, is just to open new datasets within
     # wrf_era5_regrid_xesmf; so that's why we must again specify the wrf and era5 file names below.
-    wrf_file = f'wrfout_processed_d01_{datestr}_{paramstr}.nc'
+    # wrf_file = f'wrfout_processed_d01_{datestr}_{paramstr}.nc'
+    wrf_file = f'processed_wrfout_d01_{datestr}_00:00:00'                            
     era_file = f'ERA5_EastUS_WPD-GHI_{datestr.split("-")[0]}-{datestr.split("-")[1]}.nc'
+    if verbose:
+        print(wrf_dir+wrf_file)
+        print(era_dir+era_file)
     wrfds, eradata = optwrf.regridding.wrf_era5_regrid_xesmf(wrfdir=wrf_dir, wrffile=wrf_file,
                                                              eradir=era_dir, erafile=era_file)
 
@@ -666,6 +676,7 @@ def wrf_plot(var, wrfds, hourly=False, save_fig=False, manual_color_map=None,
     # and find the domain boundaries in this projection.
     # NOTE: this task MUST occurr before we regrid the WRF variables or the coordinates change and become incompatible.
     wrf_cartopy_proj = get_wrf_proj(wrfds, 'temp')
+    wrf_cartopy_proj = get_wrf_proj(wrfds, 'dni')
     proj_bounds = get_domain_boundary(wrfds, wrf_cartopy_proj)
 
     # Now, get the desired variables
@@ -705,7 +716,9 @@ def wrf_plot(var, wrfds, hourly=False, save_fig=False, manual_color_map=None,
                 color_map = get_cmap(manual_color_map)
             else:
                 color_map = specify_clormap(var)
-            cn = ax.contourf(wrfpy.to_np(wrfds.XLONG), wrfpy.to_np(wrfds.XLAT), wrfpy.to_np(plot_var),
+            # cn = ax.contourf(wrfpy.to_np(wrfds.XLONG), wrfpy.to_np(wrfds.XLAT), wrfpy.to_np(plot_var),
+            #                  contour_levels, transform=ccrs.PlateCarree(), cmap=color_map)
+            cn = ax.contourf(wrfpy.to_np(wrfds.lon), wrfpy.to_np(wrfds.lat), wrfpy.to_np(plot_var),
                              contour_levels, transform=ccrs.PlateCarree(), cmap=color_map)
 
             # Format the plot
@@ -733,7 +746,9 @@ def wrf_plot(var, wrfds, hourly=False, save_fig=False, manual_color_map=None,
             color_map = get_cmap(manual_color_map)
         else:
             color_map = specify_clormap(var)
-        cn = ax.contourf(wrfpy.to_np(wrfds.XLONG), wrfpy.to_np(wrfds.XLAT), wrfpy.to_np(plot_var),
+        # cn = ax.contourf(wrfpy.to_np(wrfds.XLONG), wrfpy.to_np(wrfds.XLAT), wrfpy.to_np(plot_var),
+        #                  contour_levels, transform=ccrs.PlateCarree(), cmap=color_map)
+        cn = ax.contourf(wrfpy.to_np(wrfds.lon), wrfpy.to_np(wrfds.lat), wrfpy.to_np(plot_var),
                          contour_levels, transform=ccrs.PlateCarree(), cmap=color_map)
 
         # Format the plot
