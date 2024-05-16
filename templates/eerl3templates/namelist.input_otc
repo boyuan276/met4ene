@@ -6,7 +6,7 @@
  history_interval                    = 60,  60,   60,
  frames_per_outfile                  = 1000, 1000, 1000,
  restart                             = .false.,
- restart_interval                    = 7200,
+ restart_interval                    = 1440,
  io_form_history                     = 2
  io_form_restart                     = 2
  io_form_input                       = 2
@@ -17,15 +17,15 @@
  /
 
  &domains
- time_step                           = 45,
+ time_step                           = 30,
  time_step_fract_num                 = 0,
  time_step_fract_den                 = 1,
 %DOMAIN%
  e_we                                = 472, 226, 173,
  e_sn                                = 312, 253, 173,
- e_vert                              =  35,  35,  35,
+ e_vert                              =  36,  36,  36,
  p_top_requested                     = 5000,
- eta_levels                          = 0.9975, 0.995, 0.990,
+ eta_levels                          = 1.000, 0.9975, 0.995, 0.990,
                                        0.985, 0.980, 0.970, 0.960,
                                        0.950, 0.940, 0.930, 0.920,
                                        0.910, 0.900, 0.880, 0.860,
@@ -60,7 +60,7 @@
  surface_input_source                = 1,
  num_soil_layers                     = 4,
  num_land_cat			             = 21,
- windfarm_opt                        = 0,     0,     1
+ windfarm_opt                        = 0,     0,     0
  windfarm_ij                         = 0
  /
 

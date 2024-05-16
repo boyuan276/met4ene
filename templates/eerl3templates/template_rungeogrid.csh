@@ -1,8 +1,8 @@
 #!/bin/csh
 
 #SBATCH -J geogrid		# Job name
-#SBATCH -o /share/mzhang/jas983/wrf_data/met4ene/wrfout/logs/output.geogrid.%j	# Name of stdout output file (%j expands to jobId)
-#SBATCH -e /share/mzhang/jas983/wrf_data/met4ene/wrfout/logs/errors.geogrid.%j	# Name of stderr output file (%j expands to jobId)
+#SBATCH -o /mnt/Bo_HDD/wrf_data/met4ene/wrfout/logs/output.geogrid.%j	# Name of stdout output file (%j expands to jobId)
+#SBATCH -e /mnt/Bo_HDD/wrf_data/met4ene/wrfout/logs/errors.geogrid.%j	# Name of stderr output file (%j expands to jobId)
 #SBATCH --nodes=1		# Total number of nodes requested 
 #SBATCH --ntasks=1		# Total number of tasks to be configured for. 
 #SBATCH --tasks-per-node=1	# sets number of tasks to run on each node. 

@@ -1,8 +1,8 @@
 #!/bin/csh
 
 #SBATCH -J wrf			# Job name
-#SBATCH -o /share/mzhang/jas983/wrf_data/met4ene/wrfout/logs/output.wrf.%j		# Name of stdout output file(%j expands to jobId)
-#SBATCH -e /share/mzhang/jas983/wrf_data/met4ene/wrfout/logs/errors.wrf.%j		# Name of stderr output file(%j expands to jobId)
+#SBATCH -o /mnt/Bo_HDD/wrf_data/met4ene/wrfout/logs/output.wrf.%j		# Name of stdout output file(%j expands to jobId)
+#SBATCH -e /mnt/Bo_HDD/wrf_data/met4ene/wrfout/logs/errors.wrf.%j		# Name of stderr output file(%j expands to jobId)
 #SBATCH --ntasks=32		# Total number of tasks to be configured for.
 #SBATCH --tasks-per-node=32	# sets number of tasks to run on each node.
 #SBATCH --cpus-per-task=1	# sets number of cpus needed by each task (if task is "make -j3" number should be 3).
@@ -23,6 +23,6 @@ endif
 limit stacksize unlimited
 
 ### -----------  run wrf ---------------------------
-mpirun -np 32 ${argv}wrf.exe
+/usr/bin/mpirun -np 32 ${argv}wrf.exe
 
 exit

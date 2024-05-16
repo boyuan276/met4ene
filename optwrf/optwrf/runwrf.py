@@ -136,14 +136,14 @@ class WRFModel:
             self.CMD_REAL = './runreal.csh'
             self.CMD_WRF = './runwrf.csh'
         else:
-#            self.CMD_GEOGRID = 'sbatch --requeue ' + self.DIR_WRFOUT + 'rungeogrid.csh ' + self.DIR_WRFOUT
-#            self.CMD_UNGMETG = 'sbatch --requeue ' + self.DIR_WRFOUT + 'runungmetg.csh ' + self.DIR_WRFOUT
-#            self.CMD_REAL = 'sbatch --requeue ' + self.DIR_WRFOUT + 'runreal.csh ' + self.DIR_WRFOUT
-#            self.CMD_WRF = 'sbatch --requeue ' + self.DIR_WRFOUT + 'runwrf.csh ' + self.DIR_WRFOUT
-            self.CMD_GEOGRID = 'csh ' + self.DIR_WRFOUT + 'rungeogrid.csh ' + self.DIR_WRFOUT
-            self.CMD_UNGMETG = 'csh ' + self.DIR_WRFOUT + 'runungmetg.csh ' + self.DIR_WRFOUT
-            self.CMD_REAL = 'csh ' + self.DIR_WRFOUT + 'runreal.csh ' + self.DIR_WRFOUT
-            self.CMD_WRF = 'csh ' + self.DIR_WRFOUT + 'runwrf.csh ' + self.DIR_WRFOUT
+           self.CMD_GEOGRID = 'sbatch --requeue ' + self.DIR_WRFOUT + 'rungeogrid.csh ' + self.DIR_WRFOUT
+           self.CMD_UNGMETG = 'sbatch --requeue ' + self.DIR_WRFOUT + 'runungmetg.csh ' + self.DIR_WRFOUT
+           self.CMD_REAL = 'sbatch --requeue ' + self.DIR_WRFOUT + 'runreal.csh ' + self.DIR_WRFOUT
+           self.CMD_WRF = 'sbatch --requeue ' + self.DIR_WRFOUT + 'runwrf.csh ' + self.DIR_WRFOUT
+            # self.CMD_GEOGRID = 'csh ' + self.DIR_WRFOUT + 'rungeogrid.csh ' + self.DIR_WRFOUT
+            # self.CMD_UNGMETG = 'csh ' + self.DIR_WRFOUT + 'runungmetg.csh ' + self.DIR_WRFOUT
+            # self.CMD_REAL = 'csh ' + self.DIR_WRFOUT + 'runreal.csh ' + self.DIR_WRFOUT
+            # self.CMD_WRF = 'csh ' + self.DIR_WRFOUT + 'runwrf.csh ' + self.DIR_WRFOUT
 
     def runwrf_finish_check(self, program, nprocs=8):
         """

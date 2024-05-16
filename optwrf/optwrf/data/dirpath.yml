@@ -1,7 +1,7 @@
 # List your directory paths in this file; the others will be dependent on these.
 directory_paths:
-  DIR_WRF_ROOT: '/home/by276/models/wrf/'
-  DIR_DATA_ROOT: '/mnt/storage/by276/wrf_data/'
-  DIR_MET4ENE: '/mnt/storage/by276/wrf_data/met4ene/'
-  DIR_TEMPLATES: '/mnt/storage/by276/wrf_data/met4ene/templates/eerl3templates/'
-  DIR_ERA5_ROOT: '/mnt/storage/by276/wrf_data/data/ERA5/'
+  DIR_WRF_ROOT: '/home/by276/models/wrf_4.4/'
+  DIR_DATA_ROOT: '/mnt/Bo_HDD/wrf_data/'
+  DIR_MET4ENE: '/mnt/Bo_HDD/wrf_data/met4ene/'
+  DIR_TEMPLATES: '/mnt/Bo_HDD/wrf_data/met4ene/templates/eerl3templates/'
+  DIR_ERA5_ROOT: '/mnt/Bo_HDD/wrf_data/data/ERA5/'
