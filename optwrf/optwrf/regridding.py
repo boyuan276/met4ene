@@ -125,6 +125,15 @@ def wrf_era5_regrid_xesmf(wrfdir='./', wrffile='wrfout_processed_d01_2011-12-13_
     # WRF file containing source grid
     wrfdata = xr.open_dataset(wrfdir + wrffile)
 
+    # Rename the lat-lon corrdinates to get wrf-python to recognize them
+    variables = {'XLAT': 'lat',
+                 'XLONG': 'lon'}
+    try:
+        wrfdata = xr.Dataset.rename(wrfdata, variables)
+    except ValueError:
+        print(f'Variables {variables} cannot be renamed, '
+              f'those on the left are not in this dataset.')
+
     # Get wrf variable(s) to regrid
     # Read in and convert GHI from W m-2 to kW m-2
     ghi = wrfdata.ghi
