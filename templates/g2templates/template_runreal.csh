@@ -1,8 +1,8 @@
 #!/bin/csh
 
 #SBATCH -J real			# Job name
-#SBATCH -o /home/by276/models/met4ene/wrfout/logs/output.real.%j		# Name of stdout output file(%j expands to jobId)
-#SBATCH -e /home/by276/models/met4ene/wrfout/logs/errors.real.%j		# Name of stderr output file(%j expands to jobId)
+#SBATCH -o /share/mzhang/by276/wrf_data/met4ene/wrfout/logs/output.real.%j		# Name of stdout output file(%j expands to jobId)
+#SBATCH -e /share/mzhang/by276/wrf_data/met4ene/wrfout/logs/errors.real.%j		# Name of stderr output file(%j expands to jobId)
 #SBATCH --ntasks=8		# Total number of tasks to be configured for. 
 #SBATCH --tasks-per-node=8	# sets number of tasks to run on each node.
 #SBATCH --cpus-per-task=1	# sets number of cpus needed by each task (if task is "make -j3" number should be 3).
