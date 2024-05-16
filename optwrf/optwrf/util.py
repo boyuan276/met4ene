@@ -103,6 +103,7 @@ def _wrf2xarray(netcdf_data, query_variables):
     wrfattrs_names = netcdf_data.ncattrs()
     wrfattrs = wrf.extract_global_attrs(netcdf_data, wrfattrs_names)
     data = data.assign_attrs(wrfattrs)
+    # data.attrs = wrfattrs
 
     # Fix a bug in how wrfout data is read in -- attributes must be strings to be written to NetCDF
     for var in data.data_vars:
